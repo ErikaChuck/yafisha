@@ -1,0 +1,21 @@
+#combinamos tablas existentes para complementar la información 
+revenue_cohorts = pd.merge(
+    revenue_month_user,
+    first_visit[['Uid', 'Source Id']],
+    on='Uid') 
+revenue_cohorts = pd.merge('right',
+    first_order[['Uid', 'Buy Ts', 'first_order_month']],
+    on='Uid',
+)
+
+revenue_cohort['visit_age'] = (revenue_cohorts['month'].dt.month - revenue_cohorts['first_order_month'].dt.month)
+revenue_cohort['visit_age'] += 12*(revenue_cohorts['month'].dt.year - revenue_cohorts['first_order_month'].dt.year)
+
+#Creamos una pivot table que considere el revenue y los sume
+lvt = revenue_cohort.pivot_table(
+    index='first_order_month',
+    columns = 'visit_age',
+    values = 'Revenue',
+    aggfunc='sum')
+
+orders_lvt.fillna('')
